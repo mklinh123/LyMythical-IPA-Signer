@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LyMythical IPA Signer</title>
+</head>
+<body>
+  <h2>LyMythical IPA Signer</h2>
+  <form id="signForm" enctype="multipart/form-data">
+    <label>IPA File:</label><br>
+    <input type="file" name="ipa" accept=".ipa" required><br><br>
+
+    <label>Certificate (.p12):</label><br>
+    <input type="file" name="cert" accept=".p12" required><br><br>
+
+    <label>Provisioning Profile:</label><br>
+    <input type="file" name="provision" accept=".mobileprovision" required><br><br>
+
+    <label>Password for .p12:</label><br>
+    <input type="password" name="password" required><br><br>
+
+    <button type="submit">Sign IPA</button>
+  </form>
+
+  <p id="status"></p>
+
+  <script>
+    const form = document.getElementById("signForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      document.getElementById("status").innerText = "Đang gửi dữ liệu đến server...";
+
+      const response = await fetch("https://your-backend-url/sign", {
+        method: "POST",
+        body: formData
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "signed.ipa";
+        a.click();
+        document.getElementById("status").innerText = "Ký thành công!";
+      } else {
+        document.getElementById("status").innerText = "Lỗi khi ký IPA.";
+      }
+    });
+  </script>
+</body>
+</html>
