@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LacVN Project</title>
+  <title>LacVN iSign</title>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
     * {
@@ -17,14 +17,13 @@
       background: linear-gradient(to bottom, #3a0ca3, #7209b7);
       font-family: Arial, sans-serif;
       overflow-x: hidden;
+      color: white;
       opacity: 0;
       animation: fadeIn 1s ease-in forwards;
     }
 
     @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
+      to { opacity: 1; }
     }
 
     header {
@@ -75,24 +74,132 @@
     .show {
       right: 0 !important;
     }
+
+    main {
+      margin-top: 120px;
+      padding: 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      box-shadow: 0 0 12px #c77dff;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      background-color: #fff;
+      color: #000;
+      border-radius: 6px;
+    }
+
+    .info {
+      font-size: 14px;
+      margin-top: 6px;
+      color: #cfc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background: #5f0f40;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #9d4edd;
+    }
   </style>
 </head>
 <body>
   <header>
-    <div class="logo">LacVN (LyMythical)</div>
+    <div class="logo">LacVN(LyMythical)</div>
     <div class="menu-toggle" onclick="toggleMenu()">☰</div>
   </header>
-
-  <nav id="navMenu">
+  <nav id="nav">
     <a href="#">Home</a>
-    <a href="#">Projects</a>
-    <a href="#">About</a>
+    <a href="#">Download</a>
+    <a href="#">Contact</a>
   </nav>
+
+  <main>
+    <h2>Sign Your IPA File</h2>
+    <form id="signForm" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="ipaFile">IPA File:</label>
+        <input type="file" id="ipaFile" name="ipa" accept=".ipa" required />
+      </div>
+      <div class="form-group">
+        <label for="certFile">Certificate File (.p12):</label>
+        <input type="file" id="certFile" name="p12" accept=".p12" required />
+        <div class="info" id="certInfo">No certificate loaded</div>
+      </div>
+      <div class="form-group">
+        <label for="mobileprovision">Provisioning Profile:</label>
+        <input type="file" id="mobileprovision" name="mobileprovision" accept=".mobileprovision" required />
+      </div>
+      <button type="submit">Sign Now</button>
+    </form>
+  </main>
 
   <script>
     function toggleMenu() {
-      document.getElementById('navMenu').classList.toggle('show');
+      const nav = document.getElementById('nav');
+      nav.classList.toggle('show');
     }
+
+    document.getElementById('certFile').addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        document.getElementById('certInfo').innerText = 'Certificate file loaded: ' + file.name;
+      } else {
+        document.getElementById('certInfo').innerText = 'No certificate loaded';
+      }
+    });
+
+    document.getElementById('signForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const res = await fetch('https://your-backend-api.com/sign', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'signed.ipa';
+        a.click();
+      } else {
+        alert('Signing failed. Please check your files.');
+      }
+    });
   </script>
 </body>
 </html>
