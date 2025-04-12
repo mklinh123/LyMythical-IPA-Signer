@@ -131,6 +131,13 @@
     button:hover {
       background: #9d4edd;
     }
+
+    #statusMsg {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 14px;
+      color: #ffc;
+    }
   </style>
 </head>
 <body>
@@ -161,6 +168,7 @@
         <input type="file" id="mobileprovision" name="mobileprovision" accept=".mobileprovision" required />
       </div>
       <button type="submit">Sign Now</button>
+      <div id="statusMsg"></div>
     </form>
   </main>
 
@@ -183,21 +191,30 @@
       e.preventDefault();
       const form = e.target;
       const formData = new FormData(form);
+      const status = document.getElementById('statusMsg');
 
-      const res = await fetch('https://your-backend-api.com/sign', {
-        method: 'POST',
-        body: formData
-      });
+      status.textContent = 'Signing in progress... please wait';
 
-      if (res.ok) {
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'signed.ipa';
-        a.click();
-      } else {
-        alert('Signing failed. Please check your files.');
+      try {
+        const res = await fetch('https://lymythical-ipa-signer-production.up.railway.app/sign', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (res.ok) {
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'signed.ipa';
+          a.click();
+          status.textContent = 'Signing completed! Downloading...';
+        } else {
+          const errorText = await res.text();
+          status.textContent = 'Signing failed: ' + errorText;
+        }
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
       }
     });
   </script>
